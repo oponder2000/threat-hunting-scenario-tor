@@ -100,56 +100,63 @@ DeviceNetworkEvents
 
 ### Phase 1 — TOR Installer Download (23:53 UTC)
 
-- The user 'employee' downloaded the TOR Browser portable installer (version 15.0.8) to their Downloads folder. The file rename event at 23:53:05 UTC marks the earliest observed activity, indicating the download was completed at this time.
+The user 'employee' downloaded the TOR Browser portable installer (version 15.0.8) to their Downloads folder. The file rename event at 23:53:05 UTC marks the earliest observed activity, indicating the download was completed at this time.
 
-### 2. Process Execution - TOR Browser Installation
+### Phase 2 — Silent Installation (23:55 UTC)
 
-- **Timestamp:** `2024-11-08T22:16:47.4484567Z`
-- **Event:** The user "employee" executed the file `tor-browser-windows-x86_64-portable-14.0.1.exe` in silent mode, initiating a background installation of the TOR Browser.
-- **Action:** Process creation detected.
-- **Command:** `tor-browser-windows-x86_64-portable-14.0.1.exe /S`
-- **File Path:** `C:\Users\employee\Downloads\tor-browser-windows-x86_64-portable-14.0.1.exe`
+The installer was launched directly from the Downloads folder using the /S (silent) flag, suppressing any installation prompts or user dialogs. This behavior indicates deliberate intent to install the application without drawing attention. Within approximately 19 seconds, all core TOR browser components — including firefox.exe (TOR's bundled browser) and tor.exe (the TOR routing daemon) — were extracted to the user's Desktop.
 
-### 3. Process Execution - TOR Browser Launch
+### Phase 3 — TOR Browser Launch & Process Spawning (23:55–23:57 UTC)
 
-- **Timestamp:** `2024-11-08T22:17:21.6357935Z`
-- **Event:** User "employee" opened the TOR browser. Subsequent processes associated with TOR browser, such as `firefox.exe` and `tor.exe`, were also created, indicating that the browser launched successfully.
-- **Action:** Process creation of TOR browser-related executables detected.
-- **File Path:** `C:\Users\employee\Desktop\Tor Browser\Browser\TorBrowser\Tor\tor.exe`
+The TOR Browser was opened immediately after installation. The browser spawned multiple child processes consistent with standard TOR Browser operation: a GPU rendering process, a Remote Data Decoder process, several browser tab content processes, and the tor.exe routing daemon. The tor.exe process was configured to listen on localhost port 9150 (SOCKS proxy) and 9151 (control port), which are the standard TOR Browser proxy ports.
 
-### 4. Network Connection - TOR Network
+### Phase 4 — Active TOR Network Connections (23:56–23:57 UTC)
 
-- **Timestamp:** `2024-11-08T22:18:01.1246358Z`
-- **Event:** A network connection to IP `176.198.159.33` on port `9001` by user "employee" was established using `tor.exe`, confirming TOR browser network activity.
-- **Action:** Connection success.
-- **Process:** `tor.exe`
-- **File Path:** `c:\users\employee\desktop\tor browser\browser\torbrowser\tor\tor.exe`
+The following outbound connections were established by tor.exe and firefox.exe to TOR network nodes. Connections over ports 9001 and 9030 are characteristic of TOR relay traffic; port 443 connections are consistent with TOR bridges or guard nodes using HTTPS camouflage.
 
-### 5. Additional Network Connections - TOR Browser Activity
+The TOR network was confirmed active and in use. A total of 26 successful outbound connections were logged over a roughly one-minute window. The firefox.exe process connected to the local SOCKS proxy (127.0.0.1:9150), routing all browser traffic through the TOR daemon. tor.exe simultaneously established connections to multiple TOR relay nodes across ports 9001, 9030, and 443, confirming full TOR circuit establishment and active browsing through the anonymization network.
 
-- **Timestamps:**
-  - `2024-11-08T22:18:08Z` - Connected to `194.164.169.85` on port `443`.
-  - `2024-11-08T22:18:16Z` - Local connection to `127.0.0.1` on port `9150`.
-- **Event:** Additional TOR network connections were established, indicating ongoing activity by user "employee" through the TOR browser.
-- **Action:** Multiple successful connections detected.
+### Phase 5 — Continued Browser Activity & Additional Tabs (23:57–00:01 UTC)
 
-### 6. File Creation - TOR Shopping List
+The user continued active browsing through the TOR browser, opening at least 18 browser tab processes over approximately 5 minutes. The volume and frequency of new tab processes is consistent with active web browsing through the TOR network.
 
-- **Timestamp:** `2024-11-08T22:27:19.7259964Z`
-- **Event:** The user "employee" created a file named `tor-shopping-list.txt` on the desktop, potentially indicating a list or notes related to their TOR browser activities.
-- **Action:** File creation detected.
-- **File Path:** `C:\Users\employee\Desktop\tor-shopping-list.txt`
+### Phase 6 — Suspicious File Creation: tor-shopping-list.txt.txt (00:03 UTC)
+
+
+---
+
+## IOCs
+
+
+---
 
 ---
 
 ## Summary
 
-The user "employee" on the "threat-hunt-lab" device initiated and completed the installation of the TOR browser. They proceeded to launch the browser, establish connections within the TOR network, and created various files related to TOR on their desktop, including a file named `tor-shopping-list.txt`. This sequence of activities indicates that the user actively installed, configured, and used the TOR browser, likely for anonymous browsing purposes, with possible documentation in the form of the "shopping list" file.
+On April 1, 2026, at approximately 23:53 UTC, user 'employee' on device oliver-threathu deliberately downloaded the TOR Browser portable installer (version 15.0.8) directly to their Downloads folder. At 23:55 UTC, the installer was executed using the /S silent flag — a deliberate choice to suppress all installation dialogs and avoid detection. Within seconds, the TOR Browser components (firefox.exe and tor.exe) were extracted to the user's Desktop.
+
+The TOR Browser was launched immediately following installation at 23:55:59 UTC. The tor.exe routing daemon was initialized and configured to proxy all browser traffic through the TOR network via localhost port 9150. By 23:56:25 UTC — less than 35 seconds after launch — the first successful outbound TOR connection was established. Over the following minute, 26 confirmed successful connections were made to TOR relay nodes across the globe, utilizing ports 9001, 9030, and 443 to establish and maintain an anonymized TOR circuit.
+
+The user engaged in active browsing through the TOR network for approximately 5 minutes, opening at least 18 browser tab processes between 23:55 and 00:01 UTC. At 00:03 UTC, a file named tor-shopping-list.txt.txt was created and modified on the Desktop during the TOR session. The suspicious naming and double extension of this file, combined with its creation during active TOR usage, makes it a significant artifact warranting forensic content review.
+
+The use of the /S silent install flag, installation to the Desktop, and the creation of a file explicitly named in connection with TOR browsing all suggest this was intentional, premeditated activity rather than an accidental installation. The TOR network was actively used to bypass organizational network security controls and browse anonymously, in violation of acceptable use policy.
+
 
 ---
 
 ## Response Taken
 
-TOR usage was confirmed on the endpoint `threat-hunt-lab` by the user `employee`. The device was isolated, and the user's direct manager was notified.
+TOR usage was confirmed on the endpoint oliver-threathu by the user employee. The device was isolated and the user's direct manager was notified.
+
+
+Recommended additional actions for management and security team consideration:
+- Conduct forensic imaging of the device before further changes are made to preserve evidence.
+- Review and analyze the contents of tor-shopping-list.txt.txt to determine the nature of activity conducted over the TOR network.
+- Audit the user's browsing history, clipboard, and any additional files created or modified during the TOR session window (23:53–00:04 UTC).
+- Search for any data exfiltration indicators, including large outbound transfers or sensitive file access in the same time window.
+- Review other endpoints for similar TOR-related file and process events to determine if this is an isolated incident.
+- Block TOR-related executables and known TOR entry node IPs at the network perimeter and endpoint via policy.
+
 
 ---
