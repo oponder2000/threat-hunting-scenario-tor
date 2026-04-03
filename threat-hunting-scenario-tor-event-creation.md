@@ -69,7 +69,7 @@ DeviceNetworkEvents
 
 // User shopping list was created and, changed, or deleted
 DeviceFileEvents
-| where FileName contains "shopping-list.txt"
+| where FileName contains "tor-shopping-list.txt.txt"
 ```
 
 ---
