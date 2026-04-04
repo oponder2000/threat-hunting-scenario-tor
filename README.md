@@ -127,6 +127,7 @@ The user continued active browsing through the TOR browser, opening at least 18 
 
 ## IOCs
 
+<img width="1008" height="465" alt="image" src="https://github.com/user-attachments/assets/c8969067-3077-4710-b2aa-95e83a82c4ac" />
 
 ---
 
